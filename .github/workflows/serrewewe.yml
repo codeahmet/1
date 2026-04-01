@@ -28,8 +28,13 @@ jobs:
           wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
           sudo dpkg -i cloudflared-linux-amd64.deb
 
-      - name: Start Tunnel
-        run: cloudflared tunnel --url tcp://localhost:22 &
+      - name: Start Tunnel (SHOW LINK)
+        run: |
+          cloudflared tunnel --url tcp://localhost:22 | tee tunnel.log &
+
+          sleep 10
+          echo "====== TUNNEL INFO ======"
+          cat tunnel.log
 
       - name: Keep Alive
         run: sleep 21600
