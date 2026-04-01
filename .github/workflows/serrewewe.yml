@@ -1,4 +1,4 @@
-name: Cloudflare VDS
+name: Cloudflare VDS Persistent Fake
 
 on:
   workflow_dispatch:
@@ -8,10 +8,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Repo clone
+        uses: actions/checkout@v4
+
       - name: Setup SSH
         run: |
           sudo apt update
-          sudo apt install -y openssh-server curl
+          sudo apt install -y openssh-server curl git
           
           echo "root:123123123haN@@" | sudo chpasswd
           
@@ -20,10 +23,21 @@ jobs:
           
           sudo service ssh restart
 
-      - name: Install Cloudflared
+      - name: Install Cloudflare
         run: |
           wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
           sudo dpkg -i cloudflared-linux-amd64.deb
 
       - name: Start Tunnel
-        run: cloudflared tunnel --url tcp://localhost:22
+        run: cloudflared tunnel --url tcp://localhost:22 &
+
+      - name: Keep Alive
+        run: sleep 21600
+
+      - name: Save Files
+        run: |
+          git config --global user.name "bot"
+          git config --global user.email "bot@example.com"
+          git add .
+          git commit -m "auto save" || echo "no changes"
+          git push
