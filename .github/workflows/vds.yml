@@ -1,28 +1,28 @@
-name: Free VDS
+name: Serveo VDS
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Update
-        run: sudo apt update
-
-      - name: Install ngrok
+      - name: Setup SSH
         run: |
-          wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
-          tar -xvzf ngrok-v3-stable-linux-amd64.tgz
-          sudo mv ngrok /usr/local/bin
-
-      - name: Auth ngrok
-        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-
-      - name: Start SSH
-        run: |
+          sudo apt update
           sudo apt install -y openssh-server
-          sudo service ssh start
+          
+          # şifre ayarla
+          echo "root:123123123haN@@" | sudo chpasswd
+          
+          # root login aç
+          sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+          
+          # password auth aç
+          sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+          
+          sudo service ssh restart
 
-      - name: Expose SSH
-        run: ngrok tcp 22
+      - name: Serveo Tunnel
+        run: ssh -o StrictHostKeyChecking=no -R 2222:localhost:22 serveo.net
