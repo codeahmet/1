@@ -1,0 +1,26 @@
+name: Serveo VDS1233
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        run: |
+          sudo apt update
+          sudo apt install -y openssh-server
+          
+          # şifre ayarla
+          echo "root:123123123haN@@" | sudo chpasswd
+          
+          # root login aç
+          sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+          sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+          
+          sudo service ssh restart
+
+      - name: Serveo Tunnel (AUTO PORT)
+        run: ssh -tt -o StrictHostKeyChecking=no -R 0:localhost:22 serveo.net
