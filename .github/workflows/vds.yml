@@ -1,0 +1,28 @@
+name: Free VDS
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update
+        run: sudo apt update
+
+      - name: Install ngrok
+        run: |
+          wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+          tar -xvzf ngrok-v3-stable-linux-amd64.tgz
+          sudo mv ngrok /usr/local/bin
+
+      - name: Auth ngrok
+        run: ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+      - name: Start SSH
+        run: |
+          sudo apt install -y openssh-server
+          sudo service ssh start
+
+      - name: Expose SSH
+        run: ngrok tcp 22
